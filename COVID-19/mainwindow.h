@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QComboBox>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,6 +17,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void paintEvent(QPaintEvent* ptr);
+
+    QTimer* timerUpdate;
+    void updateUI(Ui::MainWindow* ui);
 
 private:
     Ui::MainWindow *ui;

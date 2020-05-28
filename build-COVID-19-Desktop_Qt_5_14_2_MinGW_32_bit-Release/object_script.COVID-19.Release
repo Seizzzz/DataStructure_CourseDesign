@@ -1,0 +1,10 @@
+release/city.o
+release/main.o
+release/mainwindow.o
+release/mymap.o
+release/route.o
+release/tourist.o
+release/transport.o
+release/qrc_resource.o
+release/moc_mainwindow.o
+release/moc_mymap.o

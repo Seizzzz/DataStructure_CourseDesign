@@ -1,0 +1,10 @@
+debug/city.o
+debug/main.o
+debug/mainwindow.o
+debug/mymap.o
+debug/route.o
+debug/tourist.o
+debug/transport.o
+debug/qrc_resource.o
+debug/moc_mainwindow.o
+debug/moc_mymap.o

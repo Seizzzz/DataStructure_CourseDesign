@@ -15,7 +15,7 @@ const int ARRIVED = 3;
 vector<Tourist*> _Tourist_vector;
 vector<City*> _City_vector;
 vector<Transport*> _Transport_vector;
-static int time = 0;
+static int _time = 0;
 
 string digit_to_status(int n)
 {
@@ -43,7 +43,7 @@ void dbg_Tourist()
     for (auto person : _Tourist_vector)
     {
         //序号 状态 剩余时间
-        cout << person->number << ". " << digit_to_status(person->status) << " " << person->limit - time << endl;
+        cout << person->number << ". " << digit_to_status(person->status) << " " << person->limit - _time << endl;
     }
 }
 
@@ -54,19 +54,19 @@ void update_all_tourist()
         switch (tor->status)
         {
         case UNKNOWN: {
-            tor->plan_route(time);
+            tor->plan_route(_time);
             break;
         }
         case WAITING: {
-            tor->update_status(time);
+            tor->update_status(_time);
             break;
         }
         case TRAVELLING: {
-            tor->update_status(time);
+            tor->update_status(_time);
             break;
         }
         case ARRIVED: {
-            tor->plan_route(time);
+            tor->plan_route(_time);
         }
         }
     }
@@ -116,7 +116,7 @@ void input()
 
 int main()
 {
-    for (;;++time)
+    for (;;++_time)
     {
         //Sleep(5000);
         input();

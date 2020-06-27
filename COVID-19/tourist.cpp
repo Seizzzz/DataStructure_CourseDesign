@@ -15,8 +15,12 @@ static Route min_plan;
 
 void Tourist::dfs(City* at, Route rut, int time)
 {
-    if (time > this->limit || rut.risk > min_risk) return; //当前规划不符合最晚到达时间或风险超过已有方案
-    if (at->name == this->destination->name)
+    if(this->limit == INT_MAX) //不限时策略 不访问已经经过的城市
+        for(auto i : rut.via)
+            if(at->name == i->name) return;
+
+    if (time > this->limit || rut.risk > min_risk) return; //当前规划超过最晚到达时间或风险超过已有方案
+    if (at->name == this->destination->name) //完成一次规划 检查是否能更新当前方案
     {
         if (rut.risk < min_risk) min_plan = rut;
         return;
@@ -68,17 +72,21 @@ void Tourist::plan_route(int time)
 
 void Tourist::update_status(int time)
 {
-    if(this->nowat->name == this->destination->name)
+    if(time < this->stlimit) return; //时间早于最早出发时间
+
+    if(this->nowat->name == this->destination->name) //到达目的地
     {
         plan.via.clear();
         this->status = ARRIVED;
         return;
     }
+    else if(time > this->limit) this->status = FAILED; //当前时间超过最晚到达时间
+    else if(plan.via.empty()) this->plan_route(time); //未到达目的地且无规划
     else if (!plan.via.empty()) //正在实行规划中
     {
         if (time < this->plan.start_time) this->status = WAITING; //还未到达规划路线的出发时间
         else if (time == this->plan.start_time) this->status = TRAVELLING; //到达了出发时间
-        else if (time == this->plan.start_time + this->plan.time_cost) //到达了目的地
+        else if (time == this->plan.start_time + this->plan.time_cost) //到达了某个目的地
         {
             this->status = ARRIVED;
             this->nowat = plan.via[0];
@@ -86,7 +94,6 @@ void Tourist::update_status(int time)
             this->update_status(time);
         }
     }
-    else if(time > this->limit) this->status = FAILED;
 
     return;
 }

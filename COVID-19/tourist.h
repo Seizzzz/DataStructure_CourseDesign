@@ -12,6 +12,7 @@ public:
     Tourist(City* A = nullptr, City* B = nullptr, int limit = 0, int number = 0);
     int number;
     int status;
+    int stlimit; //最早出发时间
     int limit; //最晚到达时间
     void plan_route(int time);
     void update_status(int time);

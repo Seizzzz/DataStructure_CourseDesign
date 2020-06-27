@@ -64,6 +64,8 @@ void update_all_tourist()
 {
     for (auto& tor : _Tourist_vector)
     {
+        tor->update_status(_time);
+        /*
         switch (tor->status)
         {
         case UNKNOWN: {
@@ -85,6 +87,7 @@ void update_all_tourist()
             break;
         }
         }
+        */
     }
 }
 void input()
@@ -189,6 +192,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonAddTourist, &QPushButton::clicked, [=](){ //添加旅客
         Tourist* newTourist = new Tourist(findInCityVector(ui->comboBoxTouristStart->currentText()), findInCityVector(ui->comboBoxTouristDes->currentText()), ui->lineEditTouristLimit->text().toInt() + _time, _City_vector.size() - 1);
         newTourist->number = _Tourist_vector.size();
+        if(ui->checkBoxTouristNextDay->isChecked()) newTourist->stlimit = (_time/24 + 1) * 24; //第二天出发
+        if(!ui->checkBoxTouristTimeLimit->isChecked()) newTourist->limit = INT_MAX; //不限时
         _Tourist_vector.push_back(newTourist);
         //在表格中创建条目
         ui->tableWidgetTourist->setRowCount(ui->tableWidgetTourist->rowCount() + 1);

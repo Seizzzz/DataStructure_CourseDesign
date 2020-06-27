@@ -34,14 +34,16 @@ public:
     QWidget *centralwidget;
     QWidget *widgetAddTourist;
     QGridLayout *gridLayout;
-    QLabel *labelAddTourist;
     QLabel *label;
+    QLabel *label_3;
+    QCheckBox *checkBoxTouristTimeLimit;
     QComboBox *comboBoxTouristStart;
     QLabel *label_2;
-    QComboBox *comboBoxTouristDes;
-    QLabel *label_3;
     QLineEdit *lineEditTouristLimit;
+    QComboBox *comboBoxTouristDes;
     QPushButton *pushButtonAddTourist;
+    QLabel *labelAddTourist;
+    QCheckBox *checkBoxTouristNextDay;
     QWidget *widgetAddTourist_2;
     QGridLayout *gridLayout_2;
     QLabel *labelAddTourist_2;
@@ -89,15 +91,21 @@ public:
         widgetAddTourist->setGeometry(QRect(1100, 230, 181, 137));
         gridLayout = new QGridLayout(widgetAddTourist);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        labelAddTourist = new QLabel(widgetAddTourist);
-        labelAddTourist->setObjectName(QString::fromUtf8("labelAddTourist"));
-
-        gridLayout->addWidget(labelAddTourist, 0, 0, 1, 1);
-
         label = new QLabel(widgetAddTourist);
         label->setObjectName(QString::fromUtf8("label"));
 
         gridLayout->addWidget(label, 1, 0, 1, 1);
+
+        label_3 = new QLabel(widgetAddTourist);
+        label_3->setObjectName(QString::fromUtf8("label_3"));
+
+        gridLayout->addWidget(label_3, 3, 0, 1, 1);
+
+        checkBoxTouristTimeLimit = new QCheckBox(widgetAddTourist);
+        checkBoxTouristTimeLimit->setObjectName(QString::fromUtf8("checkBoxTouristTimeLimit"));
+        checkBoxTouristTimeLimit->setChecked(true);
+
+        gridLayout->addWidget(checkBoxTouristTimeLimit, 4, 1, 1, 1);
 
         comboBoxTouristStart = new QComboBox(widgetAddTourist);
         comboBoxTouristStart->setObjectName(QString::fromUtf8("comboBoxTouristStart"));
@@ -109,26 +117,32 @@ public:
 
         gridLayout->addWidget(label_2, 2, 0, 1, 1);
 
-        comboBoxTouristDes = new QComboBox(widgetAddTourist);
-        comboBoxTouristDes->setObjectName(QString::fromUtf8("comboBoxTouristDes"));
-
-        gridLayout->addWidget(comboBoxTouristDes, 2, 1, 1, 1);
-
-        label_3 = new QLabel(widgetAddTourist);
-        label_3->setObjectName(QString::fromUtf8("label_3"));
-
-        gridLayout->addWidget(label_3, 3, 0, 1, 1);
-
         lineEditTouristLimit = new QLineEdit(widgetAddTourist);
         lineEditTouristLimit->setObjectName(QString::fromUtf8("lineEditTouristLimit"));
 
         gridLayout->addWidget(lineEditTouristLimit, 3, 1, 1, 1);
+
+        comboBoxTouristDes = new QComboBox(widgetAddTourist);
+        comboBoxTouristDes->setObjectName(QString::fromUtf8("comboBoxTouristDes"));
+
+        gridLayout->addWidget(comboBoxTouristDes, 2, 1, 1, 1);
 
         pushButtonAddTourist = new QPushButton(widgetAddTourist);
         pushButtonAddTourist->setObjectName(QString::fromUtf8("pushButtonAddTourist"));
         pushButtonAddTourist->setEnabled(true);
 
         gridLayout->addWidget(pushButtonAddTourist, 4, 0, 1, 1);
+
+        labelAddTourist = new QLabel(widgetAddTourist);
+        labelAddTourist->setObjectName(QString::fromUtf8("labelAddTourist"));
+
+        gridLayout->addWidget(labelAddTourist, 0, 0, 1, 1);
+
+        checkBoxTouristNextDay = new QCheckBox(widgetAddTourist);
+        checkBoxTouristNextDay->setObjectName(QString::fromUtf8("checkBoxTouristNextDay"));
+        checkBoxTouristNextDay->setChecked(true);
+
+        gridLayout->addWidget(checkBoxTouristNextDay, 0, 1, 1, 1);
 
         widgetAddTourist_2 = new QWidget(centralwidget);
         widgetAddTourist_2->setObjectName(QString::fromUtf8("widgetAddTourist_2"));
@@ -183,7 +197,7 @@ public:
         treeWidgetCity->setObjectName(QString::fromUtf8("treeWidgetCity"));
         treeWidgetCity->setGeometry(QRect(760, 320, 331, 261));
         treeWidgetCity->setColumnCount(4);
-        treeWidgetCity->header()->setVisible(true);
+        treeWidgetCity->header()->setVisible(false);
         treeWidgetCity->header()->setDefaultSectionSize(76);
         checkBoxTime = new QCheckBox(centralwidget);
         checkBoxTime->setObjectName(QString::fromUtf8("checkBoxTime"));
@@ -290,11 +304,13 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
         actionQuit->setText(QCoreApplication::translate("MainWindow", "\351\200\200\345\207\272", nullptr));
-        labelAddTourist->setText(QCoreApplication::translate("MainWindow", "\346\267\273\345\212\240\346\227\205\345\256\242\357\274\232", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "\345\207\272\345\217\221\347\202\271\357\274\232", nullptr));
-        label_2->setText(QCoreApplication::translate("MainWindow", "\347\233\256\347\232\204\345\234\260\357\274\232", nullptr));
         label_3->setText(QCoreApplication::translate("MainWindow", "\346\227\266\351\231\220(\345\260\217\346\227\266):", nullptr));
+        checkBoxTouristTimeLimit->setText(QCoreApplication::translate("MainWindow", "\351\231\220\346\227\266", nullptr));
+        label_2->setText(QCoreApplication::translate("MainWindow", "\347\233\256\347\232\204\345\234\260\357\274\232", nullptr));
         pushButtonAddTourist->setText(QCoreApplication::translate("MainWindow", "\346\267\273\345\212\240\346\227\205\345\256\242", nullptr));
+        labelAddTourist->setText(QCoreApplication::translate("MainWindow", "\346\267\273\345\212\240\346\227\205\345\256\242\357\274\232", nullptr));
+        checkBoxTouristNextDay->setText(QCoreApplication::translate("MainWindow", "\346\254\241\346\227\245\345\207\272\345\217\221", nullptr));
         labelAddTourist_2->setText(QCoreApplication::translate("MainWindow", "\346\267\273\345\212\240\345\237\216\345\270\202\357\274\232", nullptr));
         label_4->setText(QCoreApplication::translate("MainWindow", "\345\237\216\345\270\202\345\220\215\357\274\232", nullptr));
         label_6->setText(QCoreApplication::translate("MainWindow", "\351\243\216\351\231\251\345\200\274\357\274\232", nullptr));

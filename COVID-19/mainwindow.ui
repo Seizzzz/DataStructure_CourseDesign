@@ -152,11 +152,13 @@
      </rect>
     </property>
     <property name="columnCount">
-     <number>7</number>
+     <number>9</number>
     </property>
     <attribute name="horizontalHeaderDefaultSectionSize">
      <number>65</number>
     </attribute>
+    <column/>
+    <column/>
     <column/>
     <column/>
     <column/>

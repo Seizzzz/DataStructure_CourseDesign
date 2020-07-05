@@ -20,6 +20,14 @@ QPoint myMap::drawCity(int num)
     return labelPin->pos();
 }
 
+QPoint myMap::drawCity(int num, int x, int y)
+{
+    posCity[num]->setVisible(true);
+    posCity[num]->move(x, y);
+
+    return QPoint(x, y);
+}
+
 void myMap::drawTourist(class Tourist* tor, int time)
 {
     if(tor->nowat->name == tor->destination->name){ //已到达则不再绘制
@@ -47,6 +55,7 @@ void myMap::drawTourist(class Tourist* tor, int time)
 void myMap::mousePressEvent(QMouseEvent *event)
 {
     this->labelPin->move(event->x()-labelPin->width()/2,event->y()-labelPin->height()/2);
+    qDebug() << labelPin->x() << labelPin->y() << endl;
 }
 
 myMap::myMap(QWidget *parent) : QWidget(parent)

@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <QString>
+#include <fstream>
+
+ofstream outfile("log.txt");
 
 #include <iostream>
 #include <vector>
@@ -12,16 +15,11 @@
 #include "route.h"
 using namespace std;
 
-const int UNKNOWN = 0;
-const int WAITING = 1;
-const int TRAVELLING = 2;
-const int ARRIVED = 3;
-const int FAILED = 4;
-
 vector<Tourist*> _Tourist_vector;
 vector<City*> _City_vector;
 vector<Transport*> _Transport_vector;
 static int _time = 0;
+static bool inited = false;
 
 string digit_to_status(int n)
 {
@@ -37,6 +35,7 @@ string digit_to_status(int n)
 }
 string toRealTime(int t)
 {
+    if(t == INT_MAX) return "无限制";
     string res;
     res.append(to_string(t/24));
     res.append("天");
@@ -44,91 +43,11 @@ string toRealTime(int t)
     res.append("小时");
     return res;
 }
-void dbg_City()
-{
-    for (auto city : _City_vector)
-    {
-        //序号 名称 风险
-        cout << city->number << ". " << city->name << " " << city->risk << endl;
-    }
-}
-void dbg_Tourist()
-{
-    for (auto person : _Tourist_vector)
-    {
-        //序号 状态 剩余时间
-        cout << person->number << ". " << digit_to_status(person->status) << " " << person->limit - _time << endl;
-    }
-}
 void update_all_tourist()
 {
     for (auto& tor : _Tourist_vector)
     {
-        tor->update_status(_time);
-        /*
-        switch (tor->status)
-        {
-        case UNKNOWN: {
-            tor->plan_route(_time);
-            tor->update_status(_time);
-            break;
-        }
-        case WAITING: {
-            tor->update_status(_time);
-            break;
-        }
-        case TRAVELLING: {
-            tor->update_status(_time);
-            break;
-        }
-        case ARRIVED: {
-            tor->plan_route(_time);
-            tor->update_status(_time);
-            break;
-        }
-        }
-        */
-    }
-}
-void input()
-{
-    cout << "1. 添加旅客" << endl;
-    cout << "2. 添加城市" << endl;
-    cout << "3. 添加时刻表" << endl;
-    cout << "4. 无操作" << endl;
-    int opt; cin >> opt;
-    switch (opt)
-    {
-    case 1: {
-        cout << "输入旅客的出发点、目的地、时限" << endl;
-        dbg_City();
-        int st, des, limit;
-        cin >> st >> des >> limit;
-        Tourist* newTourist = new Tourist(_City_vector[st], _City_vector[des], limit + _time, _City_vector.size() - 1);
-        newTourist->number = _Tourist_vector.size();
-        _Tourist_vector.push_back(newTourist);
-        break;
-    }
-    case 2: {
-        cout << "输入城市名称、风险值" << endl;
-        string name;
-        double risk;
-        cin >> name >> risk;
-        City* newCity = new City(name, _City_vector.size(), risk);
-        _City_vector.push_back(newCity);
-        break;
-    }
-    case 3: {
-        cout << "输入该次出发站、终点站、每日出发时间、风险值、所需时间" << endl;
-        dbg_City();
-        int st, des, st_time, cost;
-        double risk;
-        cin >> st >> des >> st_time >> risk >> cost;
-        Transport* newTransport = new Transport(_City_vector[st], _City_vector[des], st_time, risk, cost);
-        _Transport_vector.push_back(newTransport);
-        _City_vector[st]->everyday_table.push_back(newTransport);
-        break;
-    }
+        if(tor->enabled) tor->update_status(_time);
     }
 }
 City* findInCityVector(QString cityname)
@@ -148,19 +67,74 @@ void MainWindow::updateUI(Ui::MainWindow* ui)
         ui->tableWidgetTourist->setItem(i,1, new QTableWidgetItem(QString(_Tourist_vector[i]->start->name.c_str())));
         ui->tableWidgetTourist->setItem(i,2, new QTableWidgetItem(QString(_Tourist_vector[i]->destination->name.c_str())));
         ui->tableWidgetTourist->setItem(i,3, new QTableWidgetItem(digit_to_status(_Tourist_vector[i]->status).c_str()));
-        ui->tableWidgetTourist->setItem(i,4, new QTableWidgetItem(QString(to_string(_Tourist_vector[i]->risk).c_str())));
-        ui->tableWidgetTourist->setItem(i,5, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->limit).c_str()));
+        ui->tableWidgetTourist->setItem(i,4, new QTableWidgetItem(QString(to_string(_Tourist_vector[i]->plan.risk).c_str())));
+        ui->tableWidgetTourist->setItem(i,5, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->stlimit).c_str()));
+        ui->tableWidgetTourist->setItem(i,6, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->limit).c_str()));
+        if(!_Tourist_vector[i]->plan.mid_arrive_time.empty()) ui->tableWidgetTourist->setItem(i,8, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->plan.mid_arrive_time.back()).c_str()));
         QString plan;
         plan.append(_Tourist_vector[i]->nowat->name.c_str());
         for(auto i : _Tourist_vector[i]->plan.via){
             plan.append("->");
             plan.append(i->name.c_str());
         }
-        ui->tableWidgetTourist->setItem(i,6, new QTableWidgetItem(plan));
+        ui->tableWidgetTourist->setItem(i,7, new QTableWidgetItem(plan));
         ui->widgetMap->drawTourist(_Tourist_vector[i], _time);
     }
 
     return;
+}
+
+void MainWindow::inputFromFile()
+{
+    //从city.txt文件添加城市
+    ifstream cityStream("city.txt");
+    string cityName;
+    double cityRisk;
+    int cityX, cityY;
+    while(cityStream >> cityName >> cityRisk >> cityX >> cityY)
+    {
+        City* newCity = new City(cityName, _City_vector.size(), cityRisk);
+        _City_vector.push_back(newCity);
+        //更新选框
+        ui->comboBoxTouristStart->addItem(newCity->name.c_str());
+        ui->comboBoxTransportStart->addItem(newCity->name.c_str());
+        ui->comboBoxTouristDes->addItem(newCity->name.c_str());
+        ui->comboBoxTransportDes->addItem(newCity->name.c_str());
+        //在树形图中创建条目
+        ui->treeWidgetCity->addTopLevelItem(new QTreeWidgetItem(QStringList(QString(newCity->name.c_str()))));
+        //在地图上绘制城市
+        newCity->pos = ui->widgetMap->drawCity(newCity->number, cityX, cityY);
+        //输出至日志文件
+        outfile << "======添加了城市======" << endl;
+        outfile << "城市名: " << newCity->name << endl;
+        outfile << "风险值: " << newCity->risk << endl;
+        outfile << "====================" << endl;
+    }
+
+    //从transport.txt文件添加时刻表
+    ifstream transportStream("transport.txt");
+    string tranStart, tranDes;
+    int tranKind, tranStartTime, tranCost;
+    double tranRisk;
+    while(transportStream >> tranKind >> tranStart >> tranDes >> tranStartTime >> tranRisk >> tranCost)
+    {
+        Transport* newTransport = new Transport(findInCityVector(QString(tranStart.c_str())), findInCityVector(QString(tranDes.c_str())), tranStartTime, tranRisk, tranCost);
+        newTransport->transportKind = tranKind;
+        _Transport_vector.push_back(newTransport);
+        //向起始城市中添加路线
+        findInCityVector(QString(tranStart.c_str()))->everyday_table.push_back(newTransport);
+        //在树形图条目中补充内容
+        ui->treeWidgetCity->findItems(QString(tranStart.c_str()),0).front()->addChild(new QTreeWidgetItem(QStringList() << newTransport->destination->name.c_str() << QString(to_string(newTransport->risk).c_str()) << QString(to_string(newTransport->start_time).c_str()) << QString(to_string(newTransport->time_cost).c_str())));
+        //输出至日志文件
+        outfile << "======添加了时刻表======" << endl;
+        outfile << "始发站: " << newTransport->start->name << endl;
+        outfile << "终点站: " << newTransport->destination->name << endl;
+        outfile << "风险值: " << newTransport->risk << endl;
+        outfile << "每日出发时间: " << newTransport->start_time << "时" << endl;
+        outfile << "所需时长: " << newTransport->time_cost << "小时" << endl;
+        outfile << "====================" << endl;
+    }
+    inited = true;
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -171,9 +145,11 @@ MainWindow::MainWindow(QWidget *parent)
     setFixedSize(1300, 600);
     timerUpdate = new QTimer(this);
 
-    ui->tableWidgetTourist->setHorizontalHeaderLabels(QStringList() << "当前位置" << "起始" << "目的" << "状态" << "当前风险" << "最晚时间" << "当前规划");
+    ui->tableWidgetTourist->setHorizontalHeaderLabels(QStringList() << "当前位置" << "起始地点" << "目的地点" << "状态" << "当前风险" << "最早出发时间" << "最晚到达时间" << "当前规划" << "预计到达时间");
     ui->treeWidgetCity->setHeaderLabels(QStringList() << "目的地" << "风险值" << "出发时间" << "时长");
     ui->comboBoxTransportKind->addItems(QStringList() << "汽车" << "火车" << "飞机");
+
+    if(!inited) inputFromFile();
 
     connect(ui->pushButtonAddCity, &QPushButton::clicked, [=](){ //添加城市
         City* newCity = new City(ui->lineEditCityName->text().toStdString(), _City_vector.size(), ui->lineEditCityRisk->text().toDouble());
@@ -187,12 +163,23 @@ MainWindow::MainWindow(QWidget *parent)
         ui->treeWidgetCity->addTopLevelItem(new QTreeWidgetItem(QStringList(QString(newCity->name.c_str()))));
         //在地图上绘制城市
         newCity->pos = ui->widgetMap->drawCity(newCity->number);
+        //输出至日志文件
+        outfile << "======添加了城市======" << endl;
+        outfile << "城市名: " << newCity->name << endl;
+        outfile << "风险值: " << newCity->risk << endl;
+        outfile << "====================" << endl;
     });
 
     connect(ui->pushButtonAddTourist, &QPushButton::clicked, [=](){ //添加旅客
         Tourist* newTourist = new Tourist(findInCityVector(ui->comboBoxTouristStart->currentText()), findInCityVector(ui->comboBoxTouristDes->currentText()), ui->lineEditTouristLimit->text().toInt() + _time, _City_vector.size() - 1);
         newTourist->number = _Tourist_vector.size();
-        if(ui->checkBoxTouristNextDay->isChecked()) newTourist->stlimit = (_time/24 + 1) * 24; //第二天出发
+        newTourist->enabled = true;
+        if(ui->checkBoxTouristNextDay->isChecked()) //第二天出发
+        {
+            newTourist->stlimit = (_time/24 + 1) * 24;
+            newTourist->limit += 24;
+        }
+        else newTourist->stlimit = _time;
         if(!ui->checkBoxTouristTimeLimit->isChecked()) newTourist->limit = INT_MAX; //不限时
         _Tourist_vector.push_back(newTourist);
         //在表格中创建条目
@@ -202,10 +189,18 @@ MainWindow::MainWindow(QWidget *parent)
             ui->tableWidgetTourist->setItem(i,1, new QTableWidgetItem(QString(_Tourist_vector[i]->start->name.c_str())));
             ui->tableWidgetTourist->setItem(i,2, new QTableWidgetItem(QString(_Tourist_vector[i]->destination->name.c_str())));
             ui->tableWidgetTourist->setItem(i,3, new QTableWidgetItem(digit_to_status(_Tourist_vector[i]->status).c_str()));
-            ui->tableWidgetTourist->setItem(i,5, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->limit).c_str()));
+            ui->tableWidgetTourist->setItem(i,5, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->stlimit).c_str()));
+            ui->tableWidgetTourist->setItem(i,6, new QTableWidgetItem(toRealTime(_Tourist_vector[i]->limit).c_str()));
         }
         //在地图上绘制旅客
         ui->widgetMap->drawTourist(newTourist, _time);
+        //输出至日志文件
+        outfile << "======添加了旅客======" << endl;
+        outfile << "旅客序号: " << newTourist->number << endl;
+        outfile << "起始地点: " << newTourist->start->name << endl;
+        outfile << "目的地点: " << newTourist->destination->name << endl;
+        outfile << "最晚到达时间: " << toRealTime(newTourist->limit) << endl;
+        outfile << "====================" << endl;
     });
 
     connect(ui->pushButtonAddTransport, &QPushButton::clicked, [=](){ //添加时刻表
@@ -218,6 +213,14 @@ MainWindow::MainWindow(QWidget *parent)
         findInCityVector(ui->comboBoxTransportStart->currentText())->everyday_table.push_back(newTransport);
         //在树形图条目中补充内容
         ui->treeWidgetCity->findItems(ui->comboBoxTransportStart->currentText(),0).front()->addChild(new QTreeWidgetItem(QStringList() << newTransport->destination->name.c_str() << QString(to_string(newTransport->risk).c_str()) << QString(to_string(newTransport->start_time).c_str()) << QString(to_string(newTransport->time_cost).c_str())));
+        //输出至日志文件
+        outfile << "======添加了时刻表======" << endl;
+        outfile << "始发站: " << newTransport->start->name << endl;
+        outfile << "终点站: " << newTransport->destination->name << endl;
+        outfile << "风险值: " << newTransport->risk << endl;
+        outfile << "每日出发时间: " << newTransport->start_time << "时" << endl;
+        outfile << "所需时长: " << newTransport->time_cost << "小时" << endl;
+        outfile << "====================" << endl;
     });
 
     connect(ui->checkBoxTime, &QCheckBox::stateChanged, [=](){ //运行复选框改变
@@ -240,7 +243,7 @@ MainWindow::MainWindow(QWidget *parent)
             update_all_tourist();
             this->updateUI(ui);
         }
-        timerUpdate->start(3000);
+        timerUpdate->start(3000); //每3秒推进时间
     });
 }
 

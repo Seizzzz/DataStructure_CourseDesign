@@ -181,11 +181,11 @@ public:
         gridLayout_2->addWidget(pushButtonAddCity, 3, 0, 1, 1);
 
         tableWidgetTourist = new QTableWidget(centralwidget);
-        if (tableWidgetTourist->columnCount() < 7)
-            tableWidgetTourist->setColumnCount(7);
+        if (tableWidgetTourist->columnCount() < 9)
+            tableWidgetTourist->setColumnCount(9);
         tableWidgetTourist->setObjectName(QString::fromUtf8("tableWidgetTourist"));
         tableWidgetTourist->setGeometry(QRect(760, 40, 331, 251));
-        tableWidgetTourist->setColumnCount(7);
+        tableWidgetTourist->setColumnCount(9);
         tableWidgetTourist->horizontalHeader()->setDefaultSectionSize(65);
         treeWidgetCity = new QTreeWidget(centralwidget);
         QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();

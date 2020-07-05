@@ -16,6 +16,7 @@ public:
     QLabel* labelPin;
     void mousePressEvent(QMouseEvent *event);
     QPoint drawCity(int num);
+    QPoint drawCity(int num, int x, int y);
     void drawTourist(Tourist* tor, int time);
     vector<QLabel*> posTourist;
     vector<QLabel*> posCity;

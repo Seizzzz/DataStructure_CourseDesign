@@ -10,6 +10,8 @@ class Route
 public:
     Route();
     vector<City*> via;
+    vector<int> mid_arrive_time;
+    vector<int> mid_again_time;
     int transportKind;
     double risk;
     int start_time; //出发时间

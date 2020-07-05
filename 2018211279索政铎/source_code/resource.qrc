@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resource/map.jpg</file>
+        <file>resource/pin.png</file>
+        <file>resource/city.png</file>
+        <file>resource/tourist.png</file>
+        <file>resource/car.png</file>
+        <file>resource/plane.png</file>
+        <file>resource/train.png</file>
+    </qresource>
+</RCC>

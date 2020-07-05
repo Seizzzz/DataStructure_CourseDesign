@@ -20,6 +20,7 @@ public:
 
     QTimer* timerUpdate;
     void updateUI(Ui::MainWindow* ui);
+    void inputFromFile();
 
 private:
     Ui::MainWindow *ui;
